@@ -548,9 +548,6 @@ function mds_date($format, $when = "now", $persianNumber = 0)
                 else
                     $result .= $result1;
                 break;
-            case "M":
-                $result .= short_monthname($Dmonth);
-                break;
             case "n":
                 $result1 = $Dmonth;
                 if ($persianNumber == 1)
@@ -719,46 +716,6 @@ function monthname($month)
         return "اسفند";
 }
 
-function short_monthname($month)
-{
-
-    if ($month == "01")
-        return "فرو";
-
-    if ($month == "02")
-        return "ارد";
-
-    if ($month == "03")
-        return "خرد";
-
-    if ($month == "04")
-        return "تیر";
-
-    if ($month == "05")
-        return "مرد";
-
-    if ($month == "06")
-        return "شهر";
-
-    if ($month == "07")
-        return "مهر";
-
-    if ($month == "08")
-        return "آبا";
-
-    if ($month == "09")
-        return "آذر";
-
-    if ($month == "10")
-        return "دی";
-
-    if ($month == "11")
-        return "بهم";
-
-    if ($month == "12")
-        return "اسف";
-}
-
 //converts the numbers into the persian's number
 function Convertnumber2farsi($srting)
 {
@@ -812,41 +769,6 @@ function is_kabise($year)
     if ($year % 4 == 0 && $year % 100 != 0)
         return true;
     return false;
-}
-
-function mcheckdate($month, $day, $year)
-{
-    $m_days_in_month = array(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29);
-    if ($month <= 12 && $month > 0) {
-        if ($m_days_in_month[$month - 1] >= $day && $day > 0)
-            return 1;
-        if (is_kabise($year))
-            echo "Asdsd";
-        if (is_kabise($year) && $m_days_in_month[$month - 1] == 31)
-            return 1;
-    }
-
-    return 0;
-}
-
-function mgetdate($timestamp = "")
-{
-    if ($timestamp == "")
-        $timestamp = time();
-
-    return array(
-        0 => $timestamp,
-        "seconds" => mds_date("s", $timestamp),
-        "minutes" => mds_date("i", $timestamp),
-        "hours" => mds_date("G", $timestamp),
-        "mday" => mds_date("j", $timestamp),
-        "wday" => mds_date("w", $timestamp),
-        "mon" => mds_date("n", $timestamp),
-        "year" => mds_date("Y", $timestamp),
-        "yday" => days_of_year(mds_date("m", $timestamp), mds_date("d", $timestamp), mds_date("Y", $timestamp)),
-        "weekday" => mds_date("l", $timestamp),
-        "month" => mds_date("F", $timestamp),
-    );
 }
 
 function div($a, $b)
