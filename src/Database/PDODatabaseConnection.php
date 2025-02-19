@@ -3,7 +3,7 @@
 namespace App\Database;
 
 use App\Contracts\DatabaseConnectionInterface;
-use App\Exceptions\ConfigNotValidException;
+use App\Exceptions\Config\ConfigNotValidException;
 use App\Exceptions\DatabaseConnectionException;
 use PDO;
 use PDOException;
@@ -12,6 +12,7 @@ class PDODatabaseConnection implements DatabaseConnectionInterface
 {
     protected $connection;
     protected $config;
+    protected $type;
     const REQUIRED_CONFIG_KEYS = [
         'driver',
         'host',
@@ -19,16 +20,26 @@ class PDODatabaseConnection implements DatabaseConnectionInterface
         'db_user',
         'db_password'
     ];
-    public function __construct(array $config)
+    const REQUIRED_CONFIG_KEYS_SQLLITE = [
+        'driver',
+        'path'
+    ];
+    public function __construct(array $config, string $type = 'mysql')
     {
-        if (!$this->isConfigValid($config)) {
+        if ($type === 'mysql' && !$this->isConfigValid($config)) {
             throw new ConfigNotValidException();
         }
+
+        if ($type === 'sqlite' && !$this->isConfigValidSqlite($config)) {
+            throw new ConfigNotValidException();
+        }
+
         $this->config = $config;
+        $this->type = $type;
     }
     public function connect()
     {
-        $dsn = $this->generateDsn($this->config);
+        $dsn = $this->generateDsn($this->config, $this->type);
         try {
             $this->connection = new PDO(...$dsn);
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -42,14 +53,26 @@ class PDODatabaseConnection implements DatabaseConnectionInterface
     {
         return $this->connection;
     }
-    private function generateDsn(array $config)
+    private function generateDsn(array $config, string $type)
     {
-        $dsn = "{$config['driver']}:host={$config['host']};dbname={$config['database']}";
-        return [$dsn, $config['db_user'], $config['db_password']];
+        $generateDsn = [];
+        if ($type === 'sqlite') {
+            $dsn = "{$config['driver']}:{$config['path']}";
+            $generateDsn = [$dsn];
+        } else {
+            $dsn = "{$config['driver']}:host={$config['host']};dbname={$config['database']}";
+            $generateDsn = [$dsn, $config['db_user'], $config['db_password']];
+        }
+        return $generateDsn;
     }
     private function isConfigValid(array $config)
     {
         $matches = array_intersect(self::REQUIRED_CONFIG_KEYS, array_keys($config));
         return count($matches) === count(self::REQUIRED_CONFIG_KEYS);
+    }
+    private function isConfigValidSqlite(array $config)
+    {
+        $matches = array_intersect(self::REQUIRED_CONFIG_KEYS_SQLLITE, array_keys($config));
+        return count($matches) === count(self::REQUIRED_CONFIG_KEYS_SQLLITE);
     }
 }
